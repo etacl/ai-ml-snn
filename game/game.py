@@ -8,14 +8,15 @@ from config import *
 
 class Game:
     def __init__(self):
-        os.environ['SDL_VIDEODRIVER'] = 'dummy'
-        os.environ['SDL_AUDIODRIVER'] = 'dummy'
         pygame.init()
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption('SNN Snake AI')
         self.clock = pygame.time.Clock()
         self.font = pygame.font.Font(None, 36)
+        self.reset()
 
+    def reset(self):
+        """Resets the game to its initial state."""
         self.snake1 = Snake(GREEN, (GRID_WIDTH // 4, GRID_HEIGHT // 2), (1, 0))
         self.snake2 = Snake(BLUE, (3 * GRID_WIDTH // 4, GRID_HEIGHT // 2), (-1, 0))
 
@@ -103,18 +104,20 @@ class Game:
         pygame.display.flip()
 
     def run(self):
-        while not self.game_over:
+        """Main game loop with automatic restart."""
+        while True: # Loop forever until user quits
             self.handle_input()
-            self.update()
+            self.update() # This will set game_over to True if a collision happens
             self.draw()
-            self.clock.tick(10) # Game speed
 
-        # Keep the window open for a bit after game over
-        end_time = pygame.time.get_ticks() + 2000 # 2 seconds
-        while pygame.time.get_ticks() < end_time:
-            self.handle_input() # Still need to handle quit events
-            self.draw() # Keep drawing the final screen
+            if self.game_over:
+                # Pause for 2 seconds to show the "Game Over" screen
+                end_time = pygame.time.get_ticks() + 2000
+                while pygame.time.get_ticks() < end_time:
+                    self.handle_input() # Must keep handling quit events
+                    self.draw()
+                    self.clock.tick(10)
+
+                self.reset() # Reset the game for a new round
+
             self.clock.tick(10)
-
-        pygame.quit()
-        sys.exit()
